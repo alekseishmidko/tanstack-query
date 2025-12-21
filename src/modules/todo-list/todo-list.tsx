@@ -1,15 +1,20 @@
 import { type FC, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { todoListApi } from "./api";
+import { Loader } from "../../shared/components/loader";
 
 export const TodoList: FC = () => {
   const [page, setPage] = useState<number>(1);
-  const { data, error, isPending } = useQuery({
+  const [enabled, setEnabled] = useState<boolean>(true);
+  const { data, error, isLoading, isPlaceholderData } = useQuery({
     queryKey: ["tasks", "list", page],
     queryFn: (meta) => todoListApi.getTodoList({ page }, meta),
+    placeholderData: keepPreviousData,
+    enabled,
   });
-  if (isPending) {
-    return <p>load</p>;
+
+  if (isLoading) {
+    return <Loader />;
   }
   if (error) {
     return <>{JSON.stringify(error)}</>;
@@ -18,7 +23,16 @@ export const TodoList: FC = () => {
   return (
     <div className="max-w-[1240px] w-full mx-auto ">
       <h1 className="my-10 text-3xl">TODO LIST</h1>
-      <ul className="space-y-3 mb-5">
+
+      <button
+        className="bg-orange-400 px-4 py-2 cursor-pointer rounded-[8px] mb-8"
+        onClick={() => setEnabled((e) => !e)}
+      >
+        Enable query
+      </button>
+      <ul
+        className={"space-y-3 mb-5 " + (isPlaceholderData ? " opacity-50" : "")}
+      >
         {data?.data?.map((todo) => (
           <li
             key={todo.id}
