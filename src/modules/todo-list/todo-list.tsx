@@ -1,16 +1,26 @@
 import { type FC, useState } from "react";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { todoListApi } from "./api";
 import { Loader } from "../../shared/components/loader";
+import { useIntersection } from "../../shared/hooks/use-intersection";
 
 export const TodoList: FC = () => {
-  const [page, setPage] = useState<number>(1);
   const [enabled, setEnabled] = useState<boolean>(true);
-  const { data, error, isLoading, isPlaceholderData } = useQuery({
-    queryKey: ["tasks", "list", page],
-    queryFn: (meta) => todoListApi.getTodoList({ page }, meta),
-    placeholderData: keepPreviousData,
+  const {
+    data,
+    error,
+    isLoading,
+    isPlaceholderData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    ...todoListApi.getTodoListInfinityQueryOptions(),
     enabled,
+  });
+
+  const cursorRef = useIntersection(() => {
+    fetchNextPage();
   });
 
   if (isLoading) {
@@ -19,6 +29,8 @@ export const TodoList: FC = () => {
   if (error) {
     return <>{JSON.stringify(error)}</>;
   }
+  //Чтобы cursorRef срабатывал не в самом конце списка, а «за 5 элементов до конца»
+  const sentinelIndex = data ? data.length - 5 : 0;
 
   return (
     <div className="max-w-[1240px] w-full mx-auto ">
@@ -33,7 +45,7 @@ export const TodoList: FC = () => {
       <ul
         className={"space-y-3 mb-5 " + (isPlaceholderData ? " opacity-50" : "")}
       >
-        {data?.data?.map((todo) => (
+        {data?.map((todo, index) => (
           <li
             key={todo.id}
             className="flex items-center gap-3 rounded-lg bg-white p-3 shadow-sm border border-gray-100"
@@ -50,26 +62,19 @@ export const TodoList: FC = () => {
             >
               {todo.text}
             </span>
+            {/* sentinel вставляется за 5 элементов до конца */}
+            {index === sentinelIndex && hasNextPage && (
+              <div ref={cursorRef} className="h-1 w-full">
+                {isFetchingNextPage && <Loader />}
+              </div>
+            )}
           </li>
         ))}
       </ul>
 
-      {data && (
-        <div className="flex gap-6 align-center justify-center ">
-          <button
-            onClick={() => setPage(data?.prev ?? data?.first ?? 1)}
-            className="px-4 py-2 bg-red-200 rounded-[8px] cursor-pointer"
-          >
-            prev
-          </button>
-          <button
-            onClick={() => setPage(data?.next ?? data?.first ?? 1)}
-            className="px-4 py-2 bg-blue-200 rounded-[8px] cursor-pointer"
-          >
-            next
-          </button>
-        </div>
-      )}
+      <div ref={cursorRef} className="w-full h-[100px]">
+        {!hasNextPage && <p>Долистал до конца списка</p>}
+      </div>
     </div>
   );
 };
