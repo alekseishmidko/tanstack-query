@@ -1,9 +1,6 @@
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
+import { jsonApiInstance } from "../../shared/api/instance";
 
-const BASE_URL = import.meta.env.VITE_BASE_URL;
-if (!BASE_URL) {
-  throw Error("no BASE_URL environment variable");
-}
 export type TodoDto = { id: string; text: string; done: boolean };
 
 export type PaginatedResponse<T> = {
@@ -17,24 +14,21 @@ export type PaginatedResponse<T> = {
 };
 
 export const todoListApi = {
-  getTodoList: (
-    { page, perPage = 10 }: { page?: number; perPage?: number },
-    { signal }: { signal?: AbortSignal },
-  ) => {
-    return fetch(BASE_URL + `/tasks?_page=${page}&_per_page=${perPage}`, {
-      signal,
-    }).then((response) => {
-      return response.json() as Promise<PaginatedResponse<TodoDto[]>>;
-    });
-  },
-
-  getTodoListInfinityQueryOptions: () => {
+  getTodoListInfinityQueryOptions: ({
+    perPage = 10,
+  }: { perPage?: number } = {}) => {
     return infiniteQueryOptions({
       queryKey: ["tasks", "list"],
       // Функция запроса. React Query автоматически передаёт сюда pageParam.
       // meta.pageParam — номер текущей страницы (1, 2, 3...)
       queryFn: (meta) =>
-        todoListApi.getTodoList({ page: meta?.pageParam }, meta),
+        jsonApiInstance<PaginatedResponse<TodoDto[]>>(
+          `/tasks?_page=${meta?.pageParam}&_per_page=${perPage}`,
+          {
+            signal: meta.signal,
+          },
+        ),
+      // todoListApi.getTodoList({ page: meta?.pageParam }, meta),
       // Запрашивать данные только если enabled === true
       // (полезно при фильтрах, SSR, ленивых запросах)
 
@@ -50,12 +44,24 @@ export const todoListApi = {
       select: (result) => result.pages.flatMap((page) => page.data),
     });
   },
-  getTodoListQueryOptions: ({ page }: { page: number }) => {
+  getTodoListQueryOptions: ({
+    page,
+    perPage = 10,
+  }: {
+    page?: number;
+    perPage?: number;
+  }) => {
     return queryOptions({
       queryKey: ["tasks", "list", { page }],
       // Функция запроса. React Query автоматически передаёт сюда pageParam.
       // meta.pageParam — номер текущей страницы (1, 2, 3...)
-      queryFn: (meta) => todoListApi.getTodoList({ page }, meta),
+      queryFn: (meta) =>
+        jsonApiInstance<PaginatedResponse<TodoDto[]>>(
+          `/tasks?_page=${page}&_per_page=${perPage}`,
+          {
+            signal: meta.signal,
+          },
+        ),
     });
   },
 };

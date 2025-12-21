@@ -1,27 +1,17 @@
-import { type FC, useState } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { todoListApi } from "./api";
+import { type FC } from "react";
 import { Loader } from "../../shared/components/loader";
-import { useIntersection } from "../../shared/hooks/use-intersection";
+import { useTodoList } from "./use-todo-list";
 
 export const TodoList: FC = () => {
-  const [enabled, setEnabled] = useState<boolean>(true);
   const {
     data,
+    isPlaceholderData,
+    hasNextPage,
     error,
     isLoading,
-    isPlaceholderData,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
-    ...todoListApi.getTodoListInfinityQueryOptions(),
-    enabled,
-  });
-
-  const cursorRef = useIntersection(() => {
-    fetchNextPage();
-  });
+    sentinelCursor,
+    cursor,
+  } = useTodoList();
 
   if (isLoading) {
     return <Loader />;
@@ -36,12 +26,6 @@ export const TodoList: FC = () => {
     <div className="max-w-[1240px] w-full mx-auto ">
       <h1 className="my-10 text-3xl">TODO LIST</h1>
 
-      <button
-        className="bg-orange-400 px-4 py-2 cursor-pointer rounded-[8px] mb-8"
-        onClick={() => setEnabled((e) => !e)}
-      >
-        Enable query
-      </button>
       <ul
         className={"space-y-3 mb-5 " + (isPlaceholderData ? " opacity-50" : "")}
       >
@@ -63,18 +47,12 @@ export const TodoList: FC = () => {
               {todo.text}
             </span>
             {/* sentinel вставляется за 5 элементов до конца */}
-            {index === sentinelIndex && hasNextPage && (
-              <div ref={cursorRef} className="h-1 w-full">
-                {isFetchingNextPage && <Loader />}
-              </div>
-            )}
+            {index === sentinelIndex && hasNextPage && sentinelCursor}
           </li>
         ))}
       </ul>
 
-      <div ref={cursorRef} className="w-full h-[100px]">
-        {!hasNextPage && <p>Долистал до конца списка</p>}
-      </div>
+      {cursor}
     </div>
   );
 };
