@@ -1,9 +1,9 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { todoListApi } from "./api";
 import { useIntersection } from "../../shared/hooks/use-intersection";
 import { Loader } from "../../shared/components/loader";
 
-export const useTodoList = () => {
+export const useTodoListEternal = () => {
   const {
     data,
     error,
@@ -47,5 +47,18 @@ export const useTodoList = () => {
     cursorRef, // можно использовать самостоятельно
     sentinelCursor, // sentinel за списком
     cursor, // альтернативный курсор
+  };
+};
+export const useTodoListPagination = () => {
+  const { data, error, isLoading, isPlaceholderData, refetch } = useQuery(
+    todoListApi.getTodoListQueryOptions(),
+  );
+
+  return {
+    data, // плоский массив задач
+    error, // ошибка запроса
+    isLoading, // первый запрос
+    isPlaceholderData, // отображаются старые данные
+    refetch,
   };
 };

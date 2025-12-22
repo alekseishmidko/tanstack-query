@@ -1,7 +1,12 @@
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { jsonApiInstance } from "../../shared/api/instance";
 
-export type TodoDto = { id: string; text: string; done: boolean };
+export type TodoDto = {
+  id: string;
+  text: string;
+  done: boolean;
+  userId?: string;
+};
 
 export type PaginatedResponse<T> = {
   first: number;
@@ -14,11 +19,12 @@ export type PaginatedResponse<T> = {
 };
 
 export const todoListApi = {
+  baseKey: "tasks",
   getTodoListInfinityQueryOptions: ({
     perPage = 10,
   }: { perPage?: number } = {}) => {
     return infiniteQueryOptions({
-      queryKey: ["tasks", "list"],
+      queryKey: [todoListApi.baseKey, "list"],
       // Функция запроса. React Query автоматически передаёт сюда pageParam.
       // meta.pageParam — номер текущей страницы (1, 2, 3...)
       queryFn: (meta) =>
@@ -45,14 +51,14 @@ export const todoListApi = {
     });
   },
   getTodoListQueryOptions: ({
-    page,
-    perPage = 10,
+    page = 1,
+    perPage = 20,
   }: {
     page?: number;
     perPage?: number;
-  }) => {
+  } = {}) => {
     return queryOptions({
-      queryKey: ["tasks", "list", { page }],
+      queryKey: [todoListApi.baseKey, "list", { page }],
       // Функция запроса. React Query автоматически передаёт сюда pageParam.
       // meta.pageParam — номер текущей страницы (1, 2, 3...)
       queryFn: (meta) =>
@@ -62,6 +68,24 @@ export const todoListApi = {
             signal: meta.signal,
           },
         ),
+    });
+  },
+
+  createTodo: (data: TodoDto) => {
+    return jsonApiInstance<TodoDto>(`/tasks`, {
+      method: "POST",
+      json: data,
+    });
+  },
+  updateTodo: (data: Partial<TodoDto> & { id: string }) => {
+    return jsonApiInstance<TodoDto>(`/tasks/${data.id}`, {
+      method: "PATCH",
+      json: data,
+    });
+  },
+  deleteTodo: (id: string) => {
+    return jsonApiInstance(`/tasks/${id}`, {
+      method: "DELETE",
     });
   },
 };
