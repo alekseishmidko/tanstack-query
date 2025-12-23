@@ -11,8 +11,16 @@ export const useCreateTodo = () => {
     //   queryClient.invalidateQueries({ queryKey: [todoListApi.baseKey] });
     // },
 
-    // выполнится при любом исходе
-    // тут асинхронная ф-я чтобы улучшить ui
+    /**
+     * Вызывается при любом исходе запроса:
+     * и при успехе, и при ошибке.
+     *
+     * Здесь мы инвалидируем кэш списка todos,
+     * чтобы React Query автоматически подгрузил актуальные данные.
+     *
+     * Используем async чтобы UI работал плавно,
+     * а invalidateQueries можно "await-ать".
+     */
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey: [todoListApi.baseKey] });
     },

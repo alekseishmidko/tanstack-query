@@ -1,11 +1,6 @@
 {
   "tasks": [
     {
-      "id": "1",
-      "text": "Task 1",
-      "done": false
-    },
-    {
       "id": "2",
       "text": "Task 2",
       "done": false
@@ -38,11 +33,6 @@
     {
       "id": "8",
       "text": "Task 8",
-      "done": false
-    },
-    {
-      "id": "9",
-      "text": "Task 9",
       "done": false
     },
     {
@@ -82,14 +72,8 @@
       "userId": "default"
     },
     {
-      "id": "GeXrJ8r-etqxYDykzA6Qy",
-      "text": "qqq",
-      "done": false,
-      "userId": "default"
-    },
-    {
-      "id": "RFowsbN_CskGKdxQkIgSn",
-      "text": "1212",
+      "id": "CCiL8xYVM14x8a9aU7eAw",
+      "text": "Task 16",
       "done": false,
       "userId": "default"
     }
