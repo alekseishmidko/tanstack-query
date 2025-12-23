@@ -3,10 +3,13 @@ import { Loader } from "../../shared/components/loader";
 import { useTodoListPagination } from "./use-todo-list";
 
 import { useCreateTodo } from "./use-create-todo";
+import { useDeleteTodo } from "./use-delete-todo";
 
 export const TodoList: FC = () => {
   const { data, isPlaceholderData, error, isLoading } = useTodoListPagination();
   const createTodo = useCreateTodo();
+
+  const deleteTodo = useDeleteTodo();
   if (isLoading) {
     return <Loader />;
   }
@@ -26,7 +29,7 @@ export const TodoList: FC = () => {
         />
         <button
           disabled={createTodo.isLoading}
-          className="rounded p-2 border border-teal-500 disabled:opacity-50"
+          className="rounded p-2 border border-teal-500 disabled:opacity-50 cursor-pointer"
         >
           Создать
         </button>
@@ -46,12 +49,21 @@ export const TodoList: FC = () => {
               readOnly
               className="h-5 w-5 rounded border-gray-300 text-blue-500 focus:ring-blue-400 cursor-pointer"
             />
+            <div className="flex items-center justify-between w-full">
+              <span
+                className={`text-lg ${todo.done ? "line-through text-gray-400" : "text-navy-500"}`}
+              >
+                {todo.text}
+              </span>
 
-            <span
-              className={`text-lg ${todo.done ? "line-through text-gray-400" : "text-navy-500"}`}
-            >
-              {todo.text}
-            </span>
+              <button
+                disabled={deleteTodo.getIsItemPending(todo.id)}
+                onClick={() => deleteTodo.handleDelete(todo.id)}
+                className="rounded p-2 border border-teal-500 disabled:opacity-50 cursor-pointer"
+              >
+                Удалить
+              </button>
+            </div>
           </li>
         ))}
       </ul>

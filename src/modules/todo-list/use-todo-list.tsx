@@ -55,7 +55,7 @@ export const useTodoListPagination = () => {
   );
 
   return {
-    data, // плоский массив задач
+    data,
     error, // ошибка запроса
     isLoading, // первый запрос
     isPlaceholderData, // отображаются старые данные
