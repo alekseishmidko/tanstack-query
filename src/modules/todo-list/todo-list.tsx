@@ -4,11 +4,12 @@ import { useTodoListPagination } from "./use-todo-list";
 
 import { useCreateTodo } from "./use-create-todo";
 import { useDeleteTodo } from "./use-delete-todo";
+import { useToggleTodo } from "./use-toggle-todo";
 
 export const TodoList: FC = () => {
   const { data, isPlaceholderData, error, isLoading } = useTodoListPagination();
   const createTodo = useCreateTodo();
-
+  const toggleTodo = useToggleTodo();
   const deleteTodo = useDeleteTodo();
   if (isLoading) {
     return <Loader />;
@@ -46,6 +47,7 @@ export const TodoList: FC = () => {
             <input
               type="checkbox"
               checked={todo.done}
+              onClick={() => toggleTodo.toggleTodo(todo)}
               readOnly
               className="h-5 w-5 rounded border-gray-300 text-blue-500 focus:ring-blue-400 cursor-pointer"
             />
