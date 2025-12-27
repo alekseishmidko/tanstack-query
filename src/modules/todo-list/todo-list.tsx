@@ -1,5 +1,5 @@
 import { type FC } from "react";
-import { Loader } from "../../shared/components/loader";
+
 import { useTodoListPagination } from "./use-todo-list";
 
 import { useCreateTodo } from "./use-create-todo";
@@ -7,13 +7,11 @@ import { useDeleteTodo } from "./use-delete-todo";
 import { useToggleTodo } from "./use-toggle-todo";
 
 export const TodoList: FC = () => {
-  const { data, isPlaceholderData, error, isLoading } = useTodoListPagination();
+  const { data, error } = useTodoListPagination();
   const createTodo = useCreateTodo();
   const toggleTodo = useToggleTodo();
   const deleteTodo = useDeleteTodo();
-  if (isLoading) {
-    return <Loader />;
-  }
+
   if (error) {
     return <>{JSON.stringify(error)}</>;
   }
@@ -36,9 +34,7 @@ export const TodoList: FC = () => {
         </button>
       </form>
 
-      <ul
-        className={"space-y-3 mb-5 " + (isPlaceholderData ? " opacity-50" : "")}
-      >
+      <ul className={"space-y-3 mb-5 "}>
         {data?.data?.map((todo) => (
           <li
             key={todo.id}
