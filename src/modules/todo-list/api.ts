@@ -53,17 +53,19 @@ export const todoListApi = {
   getTodoListQueryOptions: ({
     page = 1,
     perPage = 20,
+    userId,
   }: {
     page?: number;
     perPage?: number;
+    userId?: string;
   } = {}) => {
     return queryOptions({
-      queryKey: [todoListApi.baseKey, "list", { page }],
+      queryKey: [todoListApi.baseKey, "list", { page }, { userId }],
       // Функция запроса. React Query автоматически передаёт сюда pageParam.
       // meta.pageParam — номер текущей страницы (1, 2, 3...)
       queryFn: (meta) =>
         jsonApiInstance<PaginatedResponse<TodoDto[]>>(
-          `/tasks?_page=${page}&_per_page=${perPage}`,
+          `/tasks?_page=${page}&_per_page=${perPage}&_userId=${userId}`,
           {
             signal: meta.signal,
           },

@@ -1,7 +1,6 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { todoListApi } from "./api";
 import { useIntersection } from "../../shared/hooks/use-intersection";
-import { Loader } from "../../shared/components/loader";
 
 export const useTodoListEternal = () => {
   const {
@@ -24,7 +23,7 @@ export const useTodoListEternal = () => {
   // Sentinel элемент, который ставится «в конце» списка
   const sentinelCursor = (
     <div ref={cursorRef} className="h-1 w-full">
-      {isFetchingNextPage && <Loader />}
+      {isFetchingNextPage}
     </div>
   );
 
@@ -32,7 +31,7 @@ export const useTodoListEternal = () => {
   const cursor = (
     <div ref={cursorRef} className="w-full h-[100px]">
       {!hasNextPage && <p>Долистал до конца списка</p>}
-      {isFetchingNextPage && <Loader />}
+      {isFetchingNextPage}
     </div>
   );
 
@@ -50,7 +49,7 @@ export const useTodoListEternal = () => {
   };
 };
 export const useTodoListPagination = () => {
-  const { data, error, isLoading, isPlaceholderData, refetch } = useQuery(
+  const { data, error, isLoading, refetch } = useSuspenseQuery(
     todoListApi.getTodoListQueryOptions(),
   );
 
@@ -58,7 +57,7 @@ export const useTodoListPagination = () => {
     data,
     error, // ошибка запроса
     isLoading, // первый запрос
-    isPlaceholderData, // отображаются старые данные
+
     refetch,
   };
 };
